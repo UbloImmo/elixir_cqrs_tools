@@ -80,7 +80,7 @@ defmodule Cqrs.Query do
   @callback handle_execute(query(), opts()) :: {:error, query()} | {:error, any()} | any()
   @callback handle_execute!(query(), opts()) :: any()
 
-  alias Cqrs.{Documentation, Query, QueryError, Metadata, Options, Input}
+  alias Cqrs.{Documentation, Query, QueryError, Metadata, Options, Input, Utils}
 
   defmacro __using__(opts \\ []) do
     require_all_filters = Keyword.get(opts, :require_all_filters, false)
@@ -179,15 +179,19 @@ defmodule Cqrs.Query do
       embedded_schema do
         Enum.map(@filters, fn
           {name, {:array, :enum}, opts} ->
+            opts = opts |> Utils.sanitize_valid_ecto_opts()
             Ecto.Schema.field(name, {:array, Ecto.Enum}, opts)
 
           {name, :enum, opts} ->
+            opts = opts |> Utils.sanitize_valid_ecto_opts()
             Ecto.Schema.field(name, Ecto.Enum, opts)
 
           {name, :binary_id, opts} ->
+            opts = opts |> Utils.sanitize_valid_ecto_opts()
             Ecto.Schema.field(name, Ecto.UUID, opts)
 
           {name, type, opts} ->
+            opts = opts |> Utils.sanitize_valid_ecto_opts()
             Ecto.Schema.field(name, type, opts)
         end)
       end

@@ -1,5 +1,5 @@
 defmodule Cqrs.Command do
-  alias Cqrs.{Command, CommandError, Documentation, DomainEvent, Guards, Metadata, Options, Input}
+  alias Cqrs.{Command, CommandError, Documentation, DomainEvent, Guards, Metadata, Options, Input, Utils}
 
   @moduledoc """
   The `Command` macro allows you to define a command that encapsulates a struct definition,
@@ -266,15 +266,19 @@ defmodule Cqrs.Command do
 
         Enum.map(@schema_fields, fn
           {name, {:array, :enum}, opts} ->
+          opts = opts |> Utils.sanitize_valid_ecto_opts()
             Ecto.Schema.field(name, {:array, Ecto.Enum}, opts)
 
           {name, :enum, opts} ->
+          opts = opts |> Utils.sanitize_valid_ecto_opts()
             Ecto.Schema.field(name, Ecto.Enum, opts)
 
           {name, :binary_id, opts} ->
+          opts = opts |> Utils.sanitize_valid_ecto_opts()
             Ecto.Schema.field(name, Ecto.UUID, opts)
 
           {name, type, opts} ->
+          opts = opts |> Utils.sanitize_valid_ecto_opts()
             Ecto.Schema.field(name, type, opts)
         end)
 

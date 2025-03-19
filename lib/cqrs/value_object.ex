@@ -25,7 +25,7 @@ defmodule Cqrs.ValueObject do
   """
   @callback after_validate(struct()) :: struct()
 
-  alias Cqrs.{Documentation, ValueObject, ValueObjectError, Input}
+  alias Cqrs.{Documentation, ValueObject, ValueObjectError, Input, Utils}
 
   defmacro __using__(opts \\ []) do
     require_all_fields = Keyword.get(opts, :require_all_fields, true)
@@ -102,12 +102,15 @@ defmodule Cqrs.ValueObject do
       embedded_schema do
         Enum.map(@schema_fields, fn
           {name, :enum, opts} ->
+            opts = opts |> Utils.sanitize_valid_ecto_opts()
             Ecto.Schema.field(name, Ecto.Enum, opts)
 
           {name, :binary_id, opts} ->
+            opts = opts |> Utils.sanitize_valid_ecto_opts()
             Ecto.Schema.field(name, Ecto.UUID, opts)
 
           {name, type, opts} ->
+            opts = opts |> Utils.sanitize_valid_ecto_opts()
             Ecto.Schema.field(name, type, opts)
         end)
 
